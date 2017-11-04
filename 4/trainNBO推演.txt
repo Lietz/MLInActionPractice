@@ -1,0 +1,39 @@
+trainNBO(trainMatrix,trainCategory)
+
+trainMatrix={               trainCategory={
+0,0,1,0,1				   1
+1,0,1,1,0				   1
+1,1,0,0,0}				   0}
+
+numTrainDocs=3
+numWords=5
+
+pAbusive=sum(trainCategory)/float(numTrainDocs)=2/3
+p0Num=zeros(numWords)=(0,0,0,0,0)        p0Denom=0.0
+p1Num=zeros(numWords)=(0,0,0,0,0)	 p1Denom=0.0#敏感词的总数
+
+    for i in range(numTrainDocs):
+        if trainCategory[i] ==1:  #文档class=1
+            p1Num+=trainMatrix[i] #该文档出现的词特征向量加1，敏感词出现的次数
+            p1Denom+=sum(trainMatrix[i]) #所有的文档中，该文档的总词数加1
+        else:
+            p0Num+=trainMatrix[i]
+            p0Denom+=sum(trainMatrix[i])
+
+for i in range(3)
+i=0时
+   trainCategory[0]=1
+   p1Num=(0,0,1,0,1)
+   p1Denom=sum(trainMatrix[0])=2
+i=1
+   trainCategory[1]=1
+   p1Num=(0,0,1,0,1)+(1,0,1,1,0)=(1,0,2,1,1)
+   p1Denom=2+3=5
+i=2
+   trainCategory[2]=0
+   p0Num=(1,1,0,0,0)
+   p0Denom=2
+
+p1Vect=p1Num/p1Denom=(1,0,2,1,1)/5=(0.2,0,0.4,0.4,0.4)   #敏感词出现次数、
+p0Vect=(1,1,0,0,0)/2=(0.5,0.5,0,0,0)
+pAbusive=2/3

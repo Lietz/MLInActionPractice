@@ -1,0 +1,74 @@
+datMat                              classLabels        D=mat(ones((5,1))/5)
+=         matrix([[1.,2.1],            =   [ 1.0                   =([[0.2],
+                  [2.,1.1],                  1.0                     [0.2],
+                  [1.3,1.],                 -1.0                     [0.2],
+                  [1.,1.],                  -1.0                     [0.2],
+                  [2.,1.]])                  1.0]                    [0.2]])
+
+
+buildStump(datMat,classLabels,D)
+
+dataMatrix=mat(datMat)
+labelMat=mat(classLabels).T  
+m,n=shape(dataMatrix)  =5,2
+    numSteps=10.0
+    bestStump={}
+    bestClasEst=mat(zeros((m,1)))  =([0,0,0,0,0,])
+    minError=inf  #无穷大
+
+i=0   ........i in range (n)
+rangeMin=dataMatrix[:,0].min()=1
+rangeMax=dataMatrix[:,0].max()=2
+stepSize=(rangeMax-rangeMin)/numSteps=1/10.0=0.1
+
+      j=0............j in range(-1,11)
+                  {inequal=lt
+			threshVal=(rangeMin+float(j)*stepSize)=1+(-0.1)=0.9
+			predictedVals=stumpClassify(datMat, 0, 0.9, lt)
+
+
+			SSStumpyclassify(dataMatrix,dimen,threshVal,threshIneq)
+			retArray=ones((shape(dataMatrix)[0],1)) =(1,1,1,1,1)
+			因为threshIneq=lt:
+			retArray[datMat[:,0]<=0.9]=-1.0
+			=(1,1,1,1,1)
+			predictedVals=(1,1,1,1,1)
+  			errArr=(1,1,1,1,1)
+                        errArr[(1,1,1,1,1)==(1,1,-1,-1,1)]=0
+			errArr[1,1,0,0,1]=0
+			errArr=[0,0,1,1,0]
+			weightedError=[0.2,0.2,0.2,0.2,0.2]*[0.0.1.1.0].T=0.4
+
+			minError=0.4
+			bestClasEst=(1,1,1,1,1)
+			bestStump['dim']=0
+                        bestStump['thresh']=0.9
+                        bestStump['ineq']=lt
+
+
+
+
+
+}
+		  {inequal=gt
+			threshVal=(rangeMin+float(j)*stepSize)=1+(-0.1)=0.9
+			predictedVals=stumpClassify(datMat, 0, 0.9, gt)
+
+
+			SSStumpyclassify(dataMatrix,dimen,threshVal,threshIneq)
+			retArray=ones((shape(dataMatrix)[0],1)) =(1,1,1,1,1)
+			因为threshIneq=gt:
+			retArray[datMat[:,0]>=0.9]=-1.0
+			=(-1,-1,-1,-1,-1)}
+
+
+
+
+
+	
+
+
+
+
+
+

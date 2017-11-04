@@ -1,0 +1,23 @@
+数据={飞行里程，玩游戏时间，冰淇淋消费，标签}
+文本={123 321 123 0
+      232 232 343 0
+      353 332 232 1
+      343 453 234 1
+....1000行
+               ..}
+returnMat               ...初始
+    ={0,0,0
+      0,0,0
+      0,0,0
+      0,0,0
+....1000行
+               ..}
+
+for line in arrayOLines
+        line=line.strip()  #strip,去除字符串头尾指定字符（去除空格）
+        listFromLine=line.split('\t')#split,通过指定分隔符对字符串切片，'\t'制表符，'\n'换行,''空格，每一行分割成一个list
+        returnMat[index,:]=listFromLine[0:3]     #returnMat[0,:]=listFromLine[0:3]
+        
+
+
+

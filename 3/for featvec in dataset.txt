@@ -1,0 +1,5 @@
+from collections import Iterable
+isinstance(myDat,Iterable)
+>>>True
+
+每个元素=一行=一个featvec（特征向量）  in dataset（可以迭代）

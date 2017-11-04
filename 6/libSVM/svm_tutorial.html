@@ -1,0 +1,916 @@
+<html><head>
+	<meta http-equiv="Content-Type" content="text/html; charset=big5"><title>piaip's Using (lib)SVM Tutorial</title>
+	
+	<link rel="stylesheet" type="text/css" title="Modernist" href="StyleSheets/Core/Modernist.css">
+	<script type="text/javascript" src="StyleSheets/Core/SetStyle.js"></script>
+	<script type="text/javascript">
+	    <!--
+	    GenerateCoreStyleSheets(null);
+	    -->
+	</script><link rel="alternate stylesheet" title="Chocolate" href="StyleSheets/Core/Chocolate.css">
+<link rel="alternate stylesheet" title="Midnight" href="StyleSheets/Core/Midnight.css">
+<link rel="alternate stylesheet" title="Modernist" href="StyleSheets/Core/Modernist.css">
+<link rel="alternate stylesheet" title="Oldstyle" href="StyleSheets/Core/Oldstyle.css">
+<link rel="alternate stylesheet" title="Steely" href="StyleSheets/Core/Steely.css">
+<link rel="alternate stylesheet" title="Swiss" href="StyleSheets/Core/Swiss.css">
+<link rel="alternate stylesheet" title="Traditional" href="StyleSheets/Core/Traditional.css">
+<link rel="alternate stylesheet" title="Ultramarine" href="StyleSheets/Core/Ultramarine.css">
+
+	<style type="text/css">
+	    <!--
+	    span {
+		display: block;
+	    }
+	    .math {
+		font-family: "Times New Roman" serif;
+		font-style: italic;
+	    }
+	    code {
+		display: block;
+	    }
+	    -->
+	</style>
+	<script type="text/javascript">
+	    <!--
+	    function lng(l) {
+		var dspen = "block", dspch = "block";
+		var c = document.getElementsByTagName("span");
+		//document.getElementById("body").childNodes;
+		var i = 0;
+
+		if (l == "cht") dspen = "none";
+		else if (l == "eng") dspch = "none";
+
+		if(l == "eng")
+		alert("Warning: The English version is just finished, please help me debug it and send suggestions, thanks.");
+
+		for (i = 0; i < c.length; i++) {
+		    if (c[i].lang == "zh-TW") {
+			c[i].style.display = dspch;
+			} else if (c[i].lang == "en-US") {
+			c[i].style.display = dspen;
+			} else {
+		    }
+		}
+	    }
+	    // -->
+	</script></head>
+    <body id="body">
+	<div style="border: 1px dashed rgb(170, 170, 170);">
+	    View this tutorial in: 
+	    <a href="#" onclick="lng('eng');"> English Only </a>&nbsp;&nbsp;
+	    <a href="#" onclick="lng('cht');"> TraditionalChinese Only </a>&nbsp;&nbsp;
+	    <a href="#" onclick="lng('all');"> Both (Default)</a>&nbsp;&nbsp;
+	    (req. JavaScript if you want to switch languages) 
+	</div>
+	<script type="text/javascript">
+	    <!--
+	    GenerateCoreStyleSelectMenu(null);
+	    // -->
+	</script><div style="border: 1px dashed rgb(170, 170, 170);">Core StyleSheets: <a href="#" onclick='setCSS("Chocolate");'>Chocolate</a>&nbsp;
+<a href="#" onclick='setCSS("Midnight");'>Midnight</a>&nbsp;
+<a href="#" onclick='setCSS("Modernist");'>Modernist</a>&nbsp;
+<a href="#" onclick='setCSS("Oldstyle");'>Oldstyle</a>&nbsp;
+<a href="#" onclick='setCSS("Steely");'>Steely</a>&nbsp;
+<a href="#" onclick='setCSS("Swiss");'>Swiss</a>&nbsp;
+<a href="#" onclick='setCSS("Traditional");'>Traditional</a>&nbsp;
+<a href="#" onclick='setCSS("Ultramarine");'>Ultramarine</a>&nbsp;
+</div>
+	* This document is written in multilingual format. We strongly suggest
+	that you choose your language first to get a better display.
+	<h1><span style="display: block;" lang="en-US"> piaip's Using (lib)SVM
+		Tutorial</span><!-- </H1>
+	<H1 style="margin: 10px;">-->
+	    <span style="display: block;" lang="zh-TW"> piaip 的 (lib)SVM 簡易入門 
+	</span></h1>
+	<p><i><a href="mailto:piaip@csie.ntu.edu.tw?subject=SVMTutorial">
+		piaip at csie dot ntu dot edu dot tw, </a><br>
+	    Hung-Te Lin<br>
+	    Fri Apr 18 15:04:53 CST 2003 <br>
+	    $Id: svm_tutorial.html,v 1.13 2007/10/02 05:51:55 piaip Exp piaip $
+	    <span style="display: block;" lang="zh-TW"> 原作：林弘德，轉載請保留原出處</span>
+	</i></p>
+
+	<h2> Why this tutorial is here </h2>
+	<p><span style="display: block;" lang="zh-TW">
+	    我一直覺得 SVM 是個很有趣的東西，不過也一直沒辦法 (mostly 衝堂)
+	    去聽<a href="http://www.csie.ntu.edu.tw/~cjlin/">林智仁老師</a>
+	    的 Data mining 跟 SVM 的課； 
+	    後來看了一些網路上的文件跟聽 kcwu 講了一下 
+	    <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm"> libsvm </a> 
+	    的用法後，就想整理一下，算是對於並不需要知道完整 SVM 
+	    理論的人提供使用
+	    <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm"> libsvm </a> 
+	    的入門。 原始 libsvm 的 README 跟 FAQ 也是很好的文件，
+	    不過你可能要先對 svm 跟流程有點了解才看得懂 (我在看時有這樣的感覺)；
+	    這篇入門就是為了從零開始的人而寫的。
+	    </span><span style="display: block;" lang="en-US">
+	    I've been considering SVM as an interesting and useful tool
+	    but couldn't attend the "Data mining and SVM" course
+	    by prof. cjline about it (mostly due to scheduling conflicts). After reading
+	    some materials on the internet and discussing
+	    <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm"> libsvm </a> 
+	    with some of my classmates and friends
+	    , I wanted to provide some notes here as a tutorial for those who do not need to know the
+	    complete theory behind SVM theory to use 
+	    <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm"> libsvm </a> 
+	    . The original README and FAQ files that comes with libsvm are good documents
+	    too. But you may need to have some basic knowledge of SVM and its
+	    workflow (that's how I felt when I was reading them).
+	    This tutorial is specificly for those starting from zero.
+	</span></p>
+
+	<p><span style="display: block;" lang="zh-TW">
+	    後來還有一些人提供意見，所以在此要感謝：
+	    </span><span style="display: block;" lang="en-US"> 
+	    I must thank these guys who provided feedback and helped me make this tutorial:
+	</span></p>
+	<p class="math" style="color: Blue;"> 
+	kcwu, biboshen, puffer, somi
+	</p>
+	<p> <span style="display: block;" lang="zh-TW">
+	    不過請記得底下可能有些說法不一定對，但是對於只是想用 SVM 
+	    的人來說我覺得這樣說明會比較易懂。
+	    </span><span style="display: block;" lang="en-US">
+	    Remember that some aspect below may not be correct.
+	    But for those who just wish to "USE" SVM, I think 
+	    the explanation below is easier to understand.
+	</span> </p>
+	<p> <span style="display: block;" lang="zh-TW"> 
+	    這篇入門原則上是給會寫基本程式的人看的，也是給我自己一個備忘, 
+	    不用太多數學底子，也不用對 SVM 有任何先備知識。
+	    </span><span style="display: block;" lang="en-US"> 
+	    This tutorial is basically for people who already know how to program.
+	    It's also a memo to myself.
+	    Neither too much mathmatics nor prior SVM knowledge is required.
+	</span></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    還看不懂的話有三個情形, 一是我講的不夠清楚, 二是你的常識不足,
+	    三是你是小白 ^^; 
+	    </span><span style="display: block;" lang="en-US">
+	    If you still can't understand this tutorial, there are three possibilities:
+	    1. I didn't explain clearly enough,
+	    2. You lack sufficient common knowledge,
+	    3. You don't use your brain properly ^^;
+	</span></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    我自己是以完全不懂的角度開始的，這篇入門也有不少一樣不懂 SVM 的人
+	    看過、而且看完多半都有一定程度的理解，所以假設情況一不會發生，
+	    那如果不懂一定是後兩個情況 :P 也所以, 有問題別問我。
+	    </span><span style="display: block;" lang="en-US">
+	    Since I begin writing this myself with no understanding of the subject,
+	    ans this document has been read by many people who also didn't understand SVM
+	    but gained a certain level of understanding after reading it,
+	    possibility 1 can be ruled out.
+	    Thus if you can't understand it you must belong to the latter two categories,
+	    :P thus even if you have any questions after reading this, don't ask me.
+	</span></p>
+
+	<h2> SVM: What is it and what can it do for me? </h2>
+	<p><span style="display: block;" lang="zh-TW">
+	    <a href="http://www.kernel-machines.org/"><b>
+		    SVM, Support Vector Machine</b></a>
+	    , 簡而言之它是個起源跟類神經網路有點像的東西，
+	    不過現今最常拿來就是做分類 (classification)。 
+	    也就是說，如果我有一堆已經分好類的東西 
+	    <em>（可是分類的依據是未知的！）</em> ，那當收到新的東西時， 
+	    SVM 可以預測 (predict) 新的資料要分到哪一堆去。
+		    </span><span style="display: block;" lang="en-US"> <a href="http://www.kernel-machines.org/"><b>
+		    SVM, Support Vector Machine</b></a>
+	    , is something that has similar roots with neural networks.
+	    But recently it has been widely used in <em>Classification</em>.
+	    That means, if I have some sets of things classified
+	    <em>(But you know nothing about HOW I CLASSIFIED THEM, or say
+		you don't know the rules used for classification)</em>,
+	    when a new data comes, SVM can <em>PREDICT</em> which
+	    set it should belong to.
+	</span></p>
+	<p> <span style="display: block;" lang="zh-TW">
+	    聽起來是很神奇的事（如果你覺得不神奇，請重想一想這句話代表什麼：
+	    <em>分類的依據是未知的！</em>，還是不神奇的話就請你寫個程式
+	    解解看這個問題）， 也很像要 AI 之類的高等技巧... 不過 SVM 基於
+	    <b> 統計學習理論 </b> 可以在合理的時間內漂亮的解決這個問題。
+	    </span><span style="display: block;" lang="en-US">
+	    It sounds marvelous and would seem to require advanced techniques like AI searching
+	    or some time-consuming complex computation. But SVM used
+	    some <a href="http://en.wikipedia.org/wiki/Statistical_learning_theory"> Statistical Learning Theory</a> to solve this problem
+	    in reasonable time.
+	</span></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    以圖形化的例子來說明(by <a name="svmtoy">SVMToy</a>), 
+	    像假定我在空間中標了一堆用顏色分類的點,
+	    點的顏色就是他的類別, 位置就是他的資料, 那 SVM
+	    就可以找出區隔這些點的方程式, 依此就可以分出一區區的區域;
+	    拿到新的點(資料) 時, 只要對照該位置在哪一區就可以(predict)
+	    找出他應該是哪一顏色(類別)了:
+	    </span><span style="display: block;" lang="en-US">
+	    Now we explain with a graphical example(by <a name="svmtoy">SVMToy</a>), 
+	    I marked lots of points with different colors on a plane,
+	    the color of each point is its "class" and the location is its data.
+	    SVM can then find equations to split these points and with
+	    these equations we can get colored regions. When a new point(data) comes,
+	    we can find (predict) what color (class) a point should be just by using the point's location (data)
+	</span></p>
+	<p><table>
+	    <tbody><tr><th><span style="display: block;" lang="zh-TW">原始資料分佈</span>
+		    <span style="display: block;" lang="en-US">Original Data</span></th>
+		<th><span style="display: block;" lang="zh-TW">SVM找出來的區域</span>
+		    <span style="display: block;" lang="en-US">SVM Regions </span></th></tr>
+	    <tr><td><img src="svmtoy_easy_1.png" alt="SVM Easy Sample: Before"></td>
+		<td><img src="svmtoy_easy_2.png" alt="SVM Ease Sample: After"></td></tr>
+	    <tr><td><img src="svmtoy_complex_1.png" alt="SVM Sample: Before"></td>
+		<td><img src="svmtoy_complex_2.png" alt="SVM Sample: After"></td></tr></tbody></table></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    當然 SVM 不是真的只有畫圖分區那麼簡單, 不過看上面的例子應該可以了解
+	    SVM 大概在作什麼.
+	    </span><span style="display: block;" lang="en-US">
+	    Of course SVM is not really just about painting and marking regions, but
+	    with the example above you should should be able to get some idea about what SVM is
+	    doing.
+	</span></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    要對 SVM 再多懂一點點，可以參考 cjlin 在 data mining 課的 
+	    slides: <a href="http://www.csie.ntu.edu.tw/~piaip/svm/svm_cjlin_dm.pdf"> pdf </a> or 
+	    <a href="http://www.csie.ntu.edu.tw/~piaip/svm/svm_cjlin_dm.ps"> ps </a>。 <br>
+	    底下我試著在不用看那個 slide 的情況
+	    解釋及使用 libsvm。
+	    </span><span style="display: block;" lang="en-US">
+	    To get yourself more familiar with SVM, you may refer to 
+	    the slides cjlin used in his Data Mining course :
+	    <a href="http://www.csie.ntu.edu.tw/~piaip/svm/svm_cjlin_dm.pdf"> pdf </a> or 
+	    <a href="http://www.csie.ntu.edu.tw/~piaip/svm/svm_cjlin_dm.ps"> ps </a>.<br>
+	    I'm going to try to explain and use libSVM without those slides.
+	</span></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    所以, 我們可以把 SVM 當個黑盒子, 
+	    資料丟進去讓他處理然後我們再來用就好了.
+	    </span><span style="display: block;" lang="en-US">
+	    Thus we can consider SVM as a black box. Just push data into
+	    SVM and use the output.
+	</span></p>
+
+	<h2> How do I get SVM? </h2>
+	<p><span style="display: block;" lang="zh-TW">
+	    <a href="http://www.csie.ntu.edu.tw/~cjlin/">林智仁(cjlin)老師</a>的
+	    <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm"> libsvm </a> 
+	    當然是最完美的工具.
+	    </span><span style="display: block;" lang="en-US">
+	    <a href="http://www.csie.ntu.edu.tw/~cjlin/">Chih-Jen Lin</a>'s
+	    <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm"> libsvm </a> 
+	    is of course the best tool you can ever find.
+	</span></p>
+	<h3> Download libsvm </h3>
+	<p><span style="display: block;" lang="zh-TW"> 下載處: </span>
+	<span style="display: block;" lang="en-US"> Download Location:</span></p>
+	<p>
+	<a href="http://www.csie.ntu.edu.tw/~cjlin/cgi-bin/libsvm.cgi?+http://www.csie.ntu.edu.tw/~cjlin/libsvm+zip"> libsvm.zip </a> or 
+	<a href="http://www.csie.ntu.edu.tw/~cjlin/cgi-bin/libsvm.cgi?+http://www.csie.ntu.edu.tw/~cjlin/libsvm+tar.gz"> libsvm.tar.gz </a>
+	</p>
+	<p><span style="display: block;" lang="zh-TW">
+	    .zip 跟 .tar.gz 基本上是一樣的, 只是看你的 OS; 習慣上 Windows 用
+	    .zip 比較方便 (因為有 WinZIP, 不過我都用 WinRAR), UNIX 則是用 .tar.gz
+	    </span><span style="display: block;" lang="en-US">
+	    Contents in the .zip and .tar.gz are the same. People using Windows
+	    usually like to use .zip files because they have WinZIP, which I always
+	    replace with WinRAR. UNIX users mostly prefer .tar.gz
+	</span></p>
+
+	<h3> Build libsvm </h3>
+	    <p><span style="display: block;" lang="zh-TW">
+	    解開來後, 假定是 UNIX 系統, 直接打 make 就可以了; 編不出來的話請
+	    詳讀說明和運用常識. 因為這是 tutorial, 所以我不花時間細談, 而且
+	    會編不出來的情形真是少之又少, 通常一定是你的系統有問題或你太笨了.
+	    其他的子目錄可以不管, 只要 <i>svm-train, svm-scale, svm-predict</i>
+	    三個執行檔有編出來就可以了.
+	</span><span style="display: block;" lang="en-US">
+	    After you extracted the archives, just type <b> make </b> if
+	    you are using UNIX. You may ignore some of the subdirectories.
+	    We only need these executable files:
+	    <i>svm-train, svm-scale, and svm-predict</i>
+	    </span></p>
+
+	    <p><span style="display: block;" lang="zh-TW">
+	    Windows 的用戶要自己重編當然也是可以, 不過已經有編好的 binary 在裡面了:
+	    請檢查 windows 子目錄, 應該會有 
+	    <i>svmtrain.exe, svmscale.exe, svmpredict.exe, svmtoy.exe </i>.
+	    </span><span style="display: block;" lang="en-US">
+	    Windows users may rebuild from source if you want, but there're already some
+	    prebuilt binaries in the archive: just check your "windows" subdirectory and
+	    you should find
+	    <i>svmtrain.exe, svmscale.exe, svmpredict.exe, and svmtoy.exe </i>.
+	    </span></p>
+
+	<h2> Using SVM </h2>
+	    <p><span style="display: block;" lang="zh-TW"> libsvm 有很多種用法, 這篇 tutorial
+		只打算講簡單的部分.
+		</span><span style="display: block;" lang="en-US">
+		libsvm has lots of functions. This tutorial will only
+		explain the easier parts (mostly classification with default
+		model).
+	    </span>
+	    </p>
+
+	    <h3> The programs </h3>
+	    <p><span style="display: block;" lang="zh-TW">
+		解釋一下幾個主要執行檔的作用: (UNIX/Windows 下檔名稍有不同,
+		請用常識理解我在講哪個)
+		</span><span style="display: block;" lang="en-US">
+		I'm going to describe how to use the most important
+		executables here. 
+		The filenames are a little bit different under Unix and Windows,
+		apply common sense to see which I'm referring to.
+	    </span></p>
+	    <dl>
+		<dt> svmtrain </dt>
+		<dd> <span style="display: block;" lang="zh-TW">
+		    Train (訓練) data. 跑 SVM 被戲稱為 "開火車" 
+		    也是由於這個程式名而來.
+		    train 會接受特定格式的輸入, 產生一個 "Model" 檔. 這個
+		    model 你可以想像成 SVM 的內部資料, 因為 predict 要 model
+		    才能 predict, 不能直接吃原始資料. 想想也很合理, 假定 train
+		    本身是很耗時的動作, 而 train 好可以以某種形式存起內部資料,
+		    那下次要 predict 時直接把那些內部資料 load 進來就快多了.
+		    </span><span style="display: block;" lang="en-US">
+		    Use your data for training.
+		    Running SVM is often referred to as 'driving
+		    trains' by its non-native English speaking authors because of this program.
+		    svmtrain accepts some specifically format which will be
+		    explained below and then generate a 'Model' file.
+		    You may think of a 'Model' as a storage format for the internal data of SVM.
+		    This should appear very reasonable after some thought,
+		    since training with data is a time-consuming process, so we
+		    'train' first and store the result enabling the 'predict' operation to go much faster.
+		</span></dd>
+
+		<dt> svmpredict </dt>
+		<dd> <span style="display: block;" lang="zh-TW">
+		    依照已經 train 好的 model, 再加上給定的輸入 (新值), 輸出
+		    predict (預測) 新值所對應的類別 (class). 
+		    </span><span style="display: block;" lang="en-US">
+		    Output the <i>predicted</i> class of the new input data
+		    according to a pre-trained model.
+		</span></dd>
+
+		<dt> svmscale </dt>
+		<dd><span style="display: block;" lang="zh-TW">
+		    Rescale data. 因為原始資料可能範圍過大或過小, svmscale
+		    可以先將資料重新 scale (縮放) 到適當範圍.
+		    </span><span style="display: block;" lang="en-US">
+		    Rescale data. The original data maybe too huge or small
+		    in range, thus we can rescale them to the proper range so that
+		    training and predicting will be faster.
+		</span></dd>
+	    </dl>
+	    <a name="format"><h3> File Format </h3></a>
+	    <p><span style="display: block;" lang="zh-TW">
+		檔案格式要先交代一下. 你可以參考 libsvm 裡面附的 "heart_scale":
+		</span><span style="display: block;" lang="en-US">
+		This is the input file format of SVM. You may also 
+		refer to the file "heart_scale" which is bundled in
+		official libsvm source archive.
+	    </span></p>
+	    <p><code style="color: rgb(68, 136, 170);">
+		<b>[label]</b> [index1]:[value1] [index2]:[value2] ...<br>
+		<b>[label]</b> [index1]:[value1] [index2]:[value2] ...<br>
+		.<br>
+		.<br>
+	    </code>
+	    </p><p> <span style="display: block;" lang="zh-TW"> 一行一筆資料，如 </span>
+	    <span style="display: block;" lang="en-US"> One record per line, as: </span></p>
+	    <p>
+	    <span class="math">+1 1:0.708 2:1 3:1 4:-0.320 5:-0.105 6:-1</span>
+	    </p>
+	    <dl>
+		<dt>label</dt>
+		<dd><span style="display: block;" lang="zh-TW">
+		    或說是 class, 就是你要分類的種類，通常是一些整數。
+		    </span><span style="display: block;" lang="en-US">
+		    Sometimes referred to as 'class', the class (or set) of your classification.
+		    Usually we put integers here.
+		</span></dd>
+		<dt>index</dt>
+		<dd> <span style="display: block;" lang="zh-TW">
+		    是有順序的索引，通常是放連續的整數。 
+		    </span><span style="display: block;" lang="en-US">
+		    Ordered indexes. usually continuous integers.
+		</span></dd>
+		<dt>value</dt>
+		<dd><span style="display: block;" lang="zh-TW"> 
+		    就是用來 train 的資料，通常是一堆實數。 
+		    </span><span style="display: block;" lang="en-US">
+		    The data for training. Usually lots of real (floating point)
+		    numbers.
+		</span></dd>
+	    </dl>
+	    <p><span style="display: block;" lang="zh-TW">
+		每一行都是如上的結構, 意思就是: 我有一排資料, 分別是
+		value1, value2, .... valueN, (而且它們的順序已由 indexN
+		分別指定)，這排資料的分類結果就是 label。
+		</span><span style="display: block;" lang="en-US">
+		Each line has the structure described above. It means,
+		I have an array(vector) of data(numbers): value1,
+		value2, .... valueN (and the order of the values are specified by the respective index),
+		and the class (or the result) of this array is label.
+	    </span></p>
+	    <p><span style="display: block;" lang="zh-TW">
+		或許你會不太懂，為什麼會是 value1,value2,.... 這樣一排呢？
+		這牽涉到 SVM 的原理。 你可以這樣想（我沒說這是正確的），
+		它的名字就叫 Support "Vector" Machine， 所以輸入的 
+		training data 是 "Vector"(向量), 也就是一排的 
+		x1, x2, x3, ...  這些值就是 valueN，而 x[n]
+		的 n 就是 由 indexN 指定。 這些東西又稱為 "attribute"。
+	    </span></p>
+
+	    <p><span style="display: block;" lang="zh-TW"> 
+		真實的情況是， 大部份時候我們給定的資料可能有很多
+		"特徵(feature)" 或說 "屬性(attribute)"，所以輸入會是
+		一組的。 舉例來說，以前面<a href="#svmtoy">畫點分區的例子</a>
+		來說，我們不是每個點都有 X 跟 Y 的座標嗎？ 所以它就有
+		兩種 attribute。 假定我有兩個點： (0,3) 跟 (5,8)
+		分別在 label(class) 1 跟 2 ，那就會寫成
+		<code>
+		    1 1:0 2:3<br>
+		    2 1:5 2:8<br>
+		</code>
+		同理，空間中的三維座標就等於有三組 attribute。
+		</span><span style="display: block;" lang="en-US">
+		Maybe it's confusing to you: why value, value2, ...?
+		The reason is usually the input data to the problem you
+		were trying to solve involves lots of 'features',
+		or say 'attributes', so the input will be a set (or
+		say vector/array). Take the <a href="#svmtoy">
+		    Marking points and find region</a> example described
+		above, we assumed each point has coordinates X and Y
+		so it has two attributes (X and Y). To describe
+		two points (0,3) and (5,8) as having labels(classes) 1 and 2, we
+		will write them as:
+		<code>
+		    1 1:0 2:3<br>
+		    2 1:5 2:8<br>
+		</code>
+		And 3-dimensional points will have 3 attributes.
+	    </span></p>
+	    <p> <span style="display: block;" lang="zh-TW">
+		這種檔案格式最大的好處就是可以使用 sparse matrix，
+		或說有些 data 的 attribute 可以不存在。
+		</span><span style="display: block;" lang="en-US">
+		This kind of fileformat has the advantage that
+		we can specify a sparse matrix, ie. some attribute
+		of a record can be omitted.
+	    </span></p><p>
+	</p><h2> To Run libsvm </h2>
+	    <p><span style="display: block;" lang="zh-TW">
+		來解釋一下 libsvm 的程式怎麼用。 你可以先拿 libsvm 附的
+		heart_scale 來做輸入，底下也以它為例：
+		</span><span style="display: block;" lang="en-US">
+		Now I'll show you how to use libsvm. You may use 
+		the heart_scale file in the libsvm source archive
+		as input, as I'll do in this example:
+	    </span></p>
+	    <p><span style="display: block;" lang="zh-TW">
+		看到這裡你應該也了解，使用 SVM 的流程大概就是：
+		</span><span style="display: block;" lang="en-US">
+		You should have a sense that using libsvm
+		is basically:
+	    </span></p>
+	    <ol>
+		<li> <span style="display: block;" lang="zh-TW">
+		    準備資料並做成指定<a href="#format">格式</a>
+		    (有必要時需 svmscale)
+		    </span><span style="display: block;" lang="en-US">
+		    Prepare data in specified <a href="#format"> format</a>
+		    and svmscale it if necessary.
+		</span></li>
+		<li>  <span style="display: block;" lang="zh-TW">
+		    用 svmtrain 來 train 成 model
+		    </span><span style="display: block;" lang="en-US">
+		    Train the data to create a model with svmtrain.
+		</span></li>
+		<li>  <span style="display: block;" lang="zh-TW">
+		    對新的輸入，使用 svmpredict 來 predict 新資料的 class
+		    </span><span style="display: block;" lang="en-US">
+		    Predict new input data with svmpredict and
+		    get the result.
+		</span></li>
+	    </ol>
+	    <h3> svmtrain </h3>
+	    <p><span style="display: block;" lang="zh-TW">svmtrain 的語法大致就是: </span>
+	    </p><p><span style="display: block;" lang="en-US"> The syntax of svmtrain is basically:</span>
+	    </p><p><b>svmtrain [options] training_set_file
+		[model_file]</b>
+	    </p><p> <span style="display: block;" lang="zh-TW">
+		training_set_file 就是之前的格式，而 model_file 如果不給就會
+		叫 [training_set_file].model。 options 可以先不要給。
+	    </span></p>
+	    <p><span style="display: block;" lang="en-US">
+		The format of training_set_files is described above.
+		If the model_file is not specified, it'll be
+		[training_set_file].model by default. Options can be
+		ignored at first.
+	    </span></p>
+	    <p><span style="display: block;" lang="zh-TW"> 下列程式執行結果會產生 heart_scale.model
+		檔：(螢幕輸出不是很重要，沒有錯誤就好了)
+		</span><span style="display: block;" lang="en-US">
+		The following command will generate the heart_scale.model file.
+		The screen output may be ignored if there were no errors.
+	    </span></p>
+	    <p><code> <b>./svm-train heart_scale </b><br>
+		optimization finished, #iter = 219<br>
+		nu = 0.431030<br>
+		obj = -100.877286, rho = 0.424632<br>
+		nSV = 132, nBSV = 107<br>
+		Total nSV = 132<br></code>
+	    </p><h3> svmpredict </h3>
+	    <p><span style="display: block;" lang="zh-TW">
+		svmpredict 的語法是 :
+		</span><span style="display: block;" lang="en-US">
+		The syntax to svm-predict is:
+	    </span></p>
+	    <p><b> svmpredict test_file model_file
+		output_file </b>
+	    </p><p> <span style="display: block;" lang="zh-TW">
+		test_file 就是我們要 predict 的資料。它的格式跟
+	        svmtrain 的輸入，也就是 training_set_file 是一樣的！
+		<!--
+		不過每行最前面的 label 可以省略 (因為 predict 就是要
+		predict 那個 label)。 但果 test_file 有 label 的值的話， 
+		-->
+		predict 完會順便拿 predict 出來的值跟 test_file
+		裡面寫的值去做比對，這代表： test_file 寫的 label
+		是真正的分類結果，拿來跟我們 predict 的結果比對就可以
+		知道 predict 有沒有猜對了。
+		</span><span style="display: block;" lang="en-US">
+		test_file is the data the we are going to 'predict'.
+		Its format is almost exactly the same as the 
+		training_set_file, which we fed as input
+		to svmtrain. <!-- But we can skip the leading <b> label </b>
+		(Because 'predict' will output the label). Somehow
+		if test_file has labels, -->
+		After predicting svm-predict
+		will compare the predicted label with the label written
+		in test_file. That means, test_file has the real (or
+		correct) result of classification, and after comparing
+		with our predicted result we can know whether the
+		prediction is correct or not.
+	    </span></p>
+	    <p> <span style="display: block;" lang="zh-TW">
+		也所以，我們可以拿原 training set 當做 test_file再丟給
+		svmpredict 去 predict (因為格式一樣)，看看正確率有多高，
+		方便後面調參數。   
+		</span><span style="display: block;" lang="en-US">
+		So we can use the original training_set_file as test_file
+		and feed it to svmpredict for prediction (nothing different
+		in file format) and see how high the accuracy is so
+		we can optimize the arguments.
+	    </span></p>
+	    <p> <span style="display: block;" lang="zh-TW">
+		其它參數就很好理解了： <b>model_file</b> 就是 svmtrain 出來
+		的檔案， <b>output_file</b> 是存輸出結果的檔案。 
+		</span><span style="display: block;" lang="en-US">
+		Other arguments should be easy to figure out now:
+		<b>model_file</b> is the model trained by svmtrain, and
+		<b> output_file</b> is where we store the output result.
+	    </span></p>
+	    <p><span style="display: block;" lang="zh-TW">
+		輸出的格式很簡單，每行一個 label，對應到你的 test_file
+		裡面的各行。
+		</span><span style="display: block;" lang="en-US">
+		Format of output is simple. Each line contains a label
+		corresponding to your test_file.
+	    </span></p>
+	    <p><span style="display: block;" lang="zh-TW">
+		下列程式執行結果會產生 heart_scale.out：
+		</span><span style="display: block;" lang="en-US">
+		The following commands will generate heart_scale.out:
+	    </span></p>
+	    <p><code><b> ./svm-predict heart_scale heart_scale.model
+		    heart_scale.out </b><br>
+		Accuracy = 86.6667% (234/270) (classification)<br>
+		Mean squared error = 0.533333 (regression)<br>
+		Squared correlation coefficient = 0.532639(regression)<br>
+		</code>
+	    </p><p> <span style="display: block;" lang="zh-TW">
+		As you can see，我們把原輸入丟回去 predict，
+		第一行的 Accuracy 就是預測的正確率了。
+		如果輸入沒有 label 的話，那就是真的 predict 了。
+		</span><span style="display: block;" lang="en-US">
+		As you can see, after we 'predict'ed the original
+		input, we got 'Accuracy=86.6667%" on first line as
+		accuracy of prediction. If we don't put labels
+		in input, the result is real prediction.
+	    </span></p>
+	    <p> <span style="display: block;" lang="zh-TW">
+		看到這裡，基本上你應該已經可以利用 svm 來作事了：
+		你只要寫程式輸出正確格式的資料，交給 svm 去 train，
+		後來再 predict 並讀入結果即可。 
+		</span><span style="display: block;" lang="en-US">
+		Now you can use SVM to do whatever you want!
+		Just write a program to output its data in the correct format,
+		feed the data to SVM for training, then predct and read the output.
+	    </span></p>
+
+	<h2> Advanced Topics </h2>
+	<p><span style="display: block;" lang="zh-TW"> 
+	    後面可以說是一些稍微進階的部份，我可能不會講的很清楚，
+	    因為我的重點是想表達一些觀念和解釋一些你看相關文件時
+	    很容易碰到的名詞。
+	    </span><span style="display: block;" lang="en-US"> 
+	    These are a little advanced and I may not
+	    explain very clearly. Because I just want to help you
+	    get familiar with some of the terminology and ideas that 
+	    you'll encounter when you read other (lib)SVM documents.
+	</span></p>
+
+	<h3> Scaling </h3>
+	<p><span style="display: block;" lang="zh-TW">
+	    svm-scale 目前不太好用，不過它有其必要性。因為
+	    適當的scale有助於參數的選擇(後述)還有解svm的速度。<br>
+	    svmscale 會對每個 attribute 做scale。
+	    範圍用 -l, -u 指定， 通常是[0,1]或是[-1,1]。
+	    輸出在 stdout。<br>
+	    另外要注意的(常常會忘記)是 testing data 和 
+	    training data要一起scale。<br>
+	    而 svm-scale 最難用的地方就是沒辦法指定
+	    testing data/training data(不同檔案)
+	    然後一起scale。
+	</span>
+	</p><p><span style="display: block;" lang="en-US">
+	    svm-scale is not easy to use right now, but it is important.
+	    Scaling aids the choosing of arguments (described below)
+	    and the speed of solving SVM.<br>
+	    svmscale rescales all atrributes with the specified (by
+	    <i>-l, -u</i>) range, usually [0,1] or [-1,1].<br>
+	    Please keep in mind that testing data and
+	    training data MUST BE SCALED WITH THE SAME RANGE. Don't 
+	    forget to scale your testing data before you predict.<br>
+	    We can't specify the testing and training data file together
+	    and scale them in one command, that's why svm-scale is not
+	    so easy to use right now.<br>
+	</span>
+
+	</p><h3> Arguments </h3>
+	<p><span style="display: block;" lang="zh-TW">
+	    前面提到，在 train 的時候可以下一些參數。(直接執行 
+	    svm-train 不指定輸入檔與參數會列出所有參數及語法說明)
+	    這些參數對應到原始 SVM 公式的一些參數，所以會影響
+	    predict 的正確與否。 <br>
+	    舉例來說，改個 c=10:<br>
+	    <code><b>./svm-train -c 10 heart_scale</b></code><br>
+	    再來 predict ，正確率馬上變成 92.2% (249/270)。
+	</span></p>
+	<p><span style="display: block;" lang="en-US">
+	    We know that we can use some arguments when
+	    we were training data (Running svm-train without
+	    any input file or arguments will cause it to print its list syntax help and complete
+	    arguments). These arguments corresponds to
+	    some arguments in original SVM equations so they
+	    will affect the accuracy of prediction.<br>
+	    Let's use c=10 as an example: <br>
+	    <code><b>./svm-train -c 10 heart_scale</b></code><br>
+	    If you predict again now, the accuracy will be 
+	    92.2% (249/270).
+	</span></p>
+	<h4> Cross Validation </h4>
+	<p><span style="display: block;" lang="zh-TW">
+	    一般而言， SVM 使用的方式(在決定參數時)常是這樣：
+	    <ol>
+		<li> 先有已分好類的一堆資料</li>
+		<li> 亂數拆成好幾組 training set</li>
+		<li> 用某組參數去 train 並 predict 別組看正確率</li>
+		<li> 正確率不夠的話，換參數再重複 train/predict</li>
+	    </ol>
+	</span><span style="display: block;" lang="en-US">
+	    Mostly people use SVM while following this workflow:
+	    <ol>
+		<li> Prepare lots of pre-classified (correct) data</li>
+		<li> Split them into several training sets randomly.</li>
+		<li> Train with some arguments and predict other sets of
+		data to calculate the accuracy.</li>
+		<li> Change the arguments and repeat until
+		we get good accuracy.</li>
+	    </ol>
+	</span></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    等找到一組不錯的參數後，就拿這組參數來建 model
+	    並用來做最後對未知資料的 predict。 
+	    這整個過程叫 <b> cross validation </b>，
+	    也就是交叉比對。
+	    </span><span style="display: block;" lang="en-US">
+	    When we got some nice arguments, we will then
+	    use them to train the model and use the model for final 
+	    prediction (on unknown test data).
+	    This whole process is called <b> cross validation </b>.
+	</span></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    在我們找參數的過程中，可以利用 svmtrain 的內建
+	    cross validation 功能來幫忙：<br>
+	    <b>-v n: n-fold cross validation</b><br>
+	    n 就是要拆成幾組，像 n=3 就會拆成三組，然後先拿
+	    1跟2來 train model 並 predict 3 以得到正確率；
+	    再來拿 2跟 3 train 並 predict 1，最後 1,3 train 並
+	    predict 2。其它以此類推。
+	    </span><span style="display: block;" lang="en-US">
+	    In the process of experimenting with the arguments, we can use
+	    the built-in support for validation of svmtrain:<br>
+	    <b>-v n: n-fold cross validation</b><br>
+	    n is how many sets to split your input data. Specifing n=3
+	    will split data into 3 sets; train the model with data set 1 and 2 
+	    first then predict data set 3 to get the accuracy, then train
+	    with data set 2 and 3 and predict data set 1, finally train 1,3 and
+	    predict 2, ... ad infinitum.
+	</span></p>
+	<p><span style="display: block;" lang="zh-TW">
+	    如果沒有交叉比對的話，很容易找到只在特定輸入時好的
+	    參數。像前面我們 c=10 得到 92.2%，不過拿 -v 5 來看看：
+	    <code> <b>./svm-train -v 5 -c 10 heart_scale</b><br>
+		...<br>
+		Cross Validation Accuracy = 80.3704%
+	    </code>
+	    平均之後才只有 80.37%，比一開始的 86 還差。
+	    </span><span style="display: block;" lang="en-US">
+	    If we don't use cross validation, sometimes we may
+	    be fooled by some arguments only good for some special
+	    input. Like the example we used above, c=10 has 92.2%.
+	    If we do so with -v 5:
+	    <code> <b>./svm-train -v 5 -c 10 heart_scale</b><br>
+		...<br>
+		Cross Validation Accuracy = 80.3704%
+	    </code>
+	    After the prediction results is averaged with cross validation we have only 80.37% accuracy,
+	    even worse than with the original argument (86%).
+	</span></p>
+
+	<h4> What arguments rules? </h4>
+	    <p> <span style="display: block;" lang="zh-TW">
+		通常而言，比較重要的參數是 <i class="math">
+		gamma (-g) </i> 跟 <i class="math"> cost (-c)
+		</i>。而 cross validation (-v) 的參數常用 5。
+		</span><span style="display: block;" lang="en-US">
+		Generally speaking, you will only modify two
+		important arguments when you are using training with data:
+		<i class="math"> gamma (-g) </i> and 
+		<i class="math"> cost (-c) </i>. And
+		cross validation (-v) is usually set to 5.
+	    </span></p>
+	    <p><span style="display: block;" lang="zh-TW">
+		cost 預設值是 1, gamma 預設值是 1/k ，k 等於輸入
+		資料筆數。 那我們怎麼知道要用多少來當參數呢？
+		<p><em style="font-size: 200%;">&nbsp;用&nbsp;試&nbsp;的 </em>
+		<br> 是的，別懷疑，就是 Try 參數找比較好的值。
+	    </p></span><span style="display: block;" lang="en-US">
+		cost is 1 by default, and gamma has default value = 1/k ,
+		k = number of input records. Then how do we know
+		what value to choose as arguments?
+		<p><em style="font-size: 200%;">&nbsp;T R Y </em>
+		<br> Yes. Just by trial and error.
+	    </p></span></p>
+	    <p><span style="display: block;" lang="zh-TW"> 
+		Try 參數的過程常用 exponential 
+		指數成長的方式來增加與減少參數的數值，
+		也就是 2^n (2 的 n 次方)。
+		</span><span style="display: block;" lang="en-US">
+		When experimenting with arguments, the value usually
+		increases and decreases in exponential order.
+		i.e., 2^n.
+	    </span>
+	    </p><p><span style="display: block;" lang="zh-TW">
+		因為有兩組參數，所以等於要 try n*n=n^2 次。
+		這個過程是不連續的成長，所以可以想成我們在一個
+		X-Y 平面上指定的範圍內找一群格子點 (<b>grid</b>， 
+		如果你不太明白，想成方格紙或我們把平面上所有
+		整數交點都打個點，就是那樣)，每個格子點的 X 跟 
+		Y 經過換算 (如 2^x, 2^y) 就拿去當 cost 跟 gamma 
+		的值來 cross validation。
+		</span><span style="display: block;" lang="en-US">
+		Because we have two important arguments, we
+		have to try n*n=n^2 times. The whole process
+		is discontinous and can be thought of as finding the
+		<b> grid </b> points on a specified region
+		(range) of the X-Y plane (Think of marking 
+		all integer interception points on a paper).
+		Convert each grid point's X and Y coordinate
+		to exponential values (like 2^x, 2^y) then
+		we can use them as value of cost and gamme
+		for cross validation.
+	    </span></p>
+	    <p><span style="display: block;" lang="zh-TW">
+		所以現在你應該懂得 libsvm 的 python 子目錄下面
+		有個 grid.py 是做啥的了： 它把上面的過程自動化，
+		在你給定的範圍內呼叫 svm-train 去 try 所有的參數值。
+		python 是一種語言，在這裡我不做介紹，因為我會了 :P
+		(just a joke，真正原因是 -- 這是 libsvm 的 tutorial)。
+		grid.py 還會把結果 plot 出來，方便你尋找參數。
+		libsvm 有很多跟 python 結合的部份，由此可見 python
+		是強大方便的工具。很多神奇的功能，像自動登入多台
+		機器去平行跑 grid等等都是 python 幫忙的。不過
+		SVM 本身可以完全不需要 python，只是會比較方便。
+		</span><span style="display: block;" lang="en-US">
+		So look for 'grid.py' in the 'python' subdirectory
+		inside the libsvm archive. You should know what it does
+		now: automatically execute the procedure above,
+		try all argument values by calling svm-train within
+		the region specified by you. Python is a programming
+		language which I'm not going to explain here.
+		grid.py will also plot the result graphically to help you 
+		look for good arguments. There're also many parts
+		of libsvm powered by python, like 
+		logging into several hosts and running grids at
+		the same time parallel. Keep in mind that libsvm can
+		be used without python entirely. Python just only
+		helped us to do thinks quickly.
+	    </span>
+	    </p><p><span style="display: block;" lang="zh-TW">
+		跑 grid (基本上用 grid.py 跑當然是最方便，不過
+		如果你不懂 python 而且覺得很難搞，那你要自己產生
+		參數來跑也是可以的) 通常好的範圍是 
+		<span class="math" style="color: blue;"> 
+		    [c,g]=[2^-10,2^10]*[2^-10,2^10]</span>
+		另外其實 <b> grid 用 [-8,8] </b>也很夠了。
+		</span><span style="display: block;" lang="en-US">
+		Running for grids (it's more convenient to just use grid.py
+		but it's also ok if you don't) you may choose the
+		range as
+		<span class="math" style="color: blue;"> 
+		    [c,g]=[2^-10,2^10]*[2^-10,2^10]</span>
+		Usually [-8,8] is enough for grids.
+	    </span>
+
+	</p><h3> Regression </h3>
+	<span style="display: block;" lang="zh-TW">
+	    <p> 另一個值得一提的是 regression。
+	    </p><p> 簡單來說，前面都是拿 SVM 來做分類 (classification),
+	        所以 label 的值都是 discrete data、或說已知的固定值。
+		而 regression 則是求 continuous 的值、或說未知的值。
+		你也可以說，一般是 binary classification,
+		而 regression是可以預測一個實數。
+	    </p><p> 比如說我知道股市指數受到某些因素影響, 然後我想預測股市..
+		股市的指數就是我們的 label, 那些因素量化以後變成
+		attributes。 以後蒐集那些 attributes 給 SVM 它就會
+		預測出指數(可能是沒出現過的數字)，這就要用 regression。 
+		那樂透開獎的號碼呢？ 因為都是固定已知的數字，
+		很明顯我們應該用一般 SVM 的 classification 來 predict。 
+		(註：這是真實的例子 -- llwang 就寫過這樣的東西)
+	    </p><p> 所以說 label 也要 scale, 用
+		<code><b>svm-scale -y lower upper</b></code>
+	    </p><p> 但是比較糟糕的情況是 grid.py 不支援 regression ，
+		而且cross validation 對 regression 也常常不是很有效。
+	    </p><p> 總而言之，regression 是非常有趣的東西，不過也是比較
+		進階的用法。 在這裡我們不細談了，有興趣的人請再
+		參考 SVM 與 libsvm 的其它文件。
+	    </p></span>
+	<span style="display: block;" lang="en-US">
+		<p> The other important issue is "Regression".
+		</p><p> To explain briefly, we only used SVM to do
+		classification in this tutorial. The type
+		of label we used are always discrete data (ie. a known
+		fixed value). "Regression" in this context means to predict labels with continuous
+		values (or unknown values). You can think of
+		classification as predictions with only binary outcomes, and regression
+		as predictions that output real (floating point) numbers.
+		</p><p> Thus to predict lottery numbers (since they
+		are always fixed numbers) you should use classification,
+		and to predict the stock market you need regression.
+		</p><p> The labels must also be scaled when you 
+		use regression, by <code><b>svm-scale -y lower upper
+		</b></code>
+		</p><p> However grid.py does not support regression,
+		and cross validation sometimes does not work well
+		with regression.
+		</p><p> Regression is interesting but also advanced.
+		Please refer to other documents for details.
+	</p></span>
+
+	<h2> Epilogue</h2>
+	    <p><span style="display: block;" lang="zh-TW"> 到此我已經簡單的說明了 libsvm 的使用方式，
+		更完整的用法請參考 libsvm 的說明跟 
+		<a href="http://www.csie.ntu.edu.tw/~cjlin/">cjlin 的網站</a>、
+		SVM 的相關文件，或是去上 cjlin 的課。
+		</span><span style="display: block;" lang="en-US"> Here we have already briefly explained
+		the libsvm software. For complete usage guides please refer
+		to documents inside the libsvm archive, 
+		<a href="http://www.csie.ntu.edu.tw/~cjlin/">cjlin's website</a>,
+		SVM-related documents, or go take cjlin's course if
+		you are a student at National Taiwan University :)
+	    </span></p>
+
+	    <p><span style="display: block;" lang="zh-TW"> 對於 SVM 的新手來說， 
+		<a href="http://www.csie.ntu.edu.tw/~cjlin/libsvmtools"> 
+		    libsvmtools </a>  有很多好東西。像 SVM for dummies
+		就是很方便觀察 libsvm 流程的東西。
+		</span><span style="display: block;" lang="en-US"> Take a glance at 
+		<a href="http://www.csie.ntu.edu.tw/~cjlin/libsvmtools"> 
+		    libsvmtools </a> especially "SVM for dummies" there.
+		Those are good tools for SVM newbies that helps in observing
+		libsvm workflow.
+	    </span></p>
+	<h2> Copyright </h2>
+	<h4 style="font-style: italic;"> All rights reserved by 
+	    <a href="mailto:piaip@csie.ntu.edu.tw?subject=SVMTutorial">
+		Hung-Te Lin (林弘德, piaip), </a>，<br>
+	    Website: <a href="http://www.csie.ntu.edu.tw/~r91034/">
+		piaip at ntu csie </a>，2003.</h4>
+	<p> All HTML/text typed within VIM on Solaris. <br>
+	    Style sheet from W3C Core StyleSheets.
+	</p><p> Original URL: <a href="http://www.csie.ntu.edu.tw/~r91034/svm/svm_tutorial.html">
+	http://www.csie.ntu.edu.tw/~r91034/svm/svm_tutorial.html </a>
+    </p></body></html>
